@@ -1,0 +1,102 @@
+import java.util.*;
+import java.io.*;
+import java.math.*;
+
+/**
+ * Auto-generated code below aims at helping you parse
+ * the standard input according to the problem statement.
+ **/
+class Player {
+
+    private static LinkedList<Integer> adj[];
+    private static int N;
+    private static int[] Es;
+    
+    static void BFS(int s) {
+        // 노드의 방문 여부 판단 (초깃값: false)
+        boolean visited[] = new boolean[N];
+        // BFS 구현을 위한 큐(Queue) 생성
+        LinkedList<Integer> queue = new LinkedList<Integer>();
+
+        // 현재 노드를 방문한 것으로 표시하고 큐에 삽입(enqueue)
+        visited[s] = true;
+        queue.add(s);   
+    
+        // 큐(Queue)가 빌 때까지 반복
+        while (queue.size() != 0) {
+          // 방문한 노드를 큐에서 추출(dequeue)하고 값을 출력
+          int v = queue.poll();
+
+          // 방문한 노드와 인접한 모든 노드를 가져온다.
+          Iterator<Integer> i = adj[v].listIterator();
+          while (i.hasNext()) {
+            int n = i.next();
+            // 방문하지 않은 노드면 방문한 것으로 표시하고 큐에 삽입(enqueue)
+            if (!visited[n]) {
+                for(int e :Es) {
+                	if(n == e) {
+                		int nl =0;
+                		for(int o : adj[v]) {
+                			if(o == n) {
+                				break;
+                			}
+                			nl++;
+                		}
+                		adj[v].remove(nl);
+                		int nls =0;
+                		for(int o : adj[n]) {
+                		    if(o == v) {
+                		        break;
+                		    }
+                		    nls ++;
+                		}
+                		adj[n].remove(nls);
+                		System.out.printf("%d %d%n",v,n);
+                		return;
+                	}
+                }
+              visited[n] = true;
+              queue.add(n);
+            }
+          }
+        }
+        return;
+    }
+  
+    public static void main(String args[]) {
+        Scanner in = new Scanner(System.in);
+        N = in.nextInt(); // the total number of nodes in the level, including the gateways
+        int L = in.nextInt(); // the number of links
+        int E = in.nextInt(); // the number of exit gateways
+        
+        Es = new int[E];
+        adj = new LinkedList[N];
+        for(int i = 0; i < N; i++){
+            adj[i] = new LinkedList();
+        }
+
+
+        for (int i = 0; i < L; i++) {
+            int N1 = in.nextInt(); // N1 and N2 defines a link between these nodes
+            int N2 = in.nextInt();
+            adj[N1].add(N2);
+            adj[N2].add(N1);
+        }
+        for (int i = 0; i < E; i++) {
+            int EI = in.nextInt(); // the index of a gateway node
+            Es[i] = EI;
+        }
+
+        // game loop
+        while (true) {
+            int SI = in.nextInt(); // The index of the node on which the Skynet agent is positioned this turn
+            BFS(SI);
+
+            // Write an action using System.out.println()
+            // To debug: System.err.println("Debug messages...");
+
+
+            // Example: 0 1 are the indices of the nodes you wish to sever the link between
+        }
+    }
+}

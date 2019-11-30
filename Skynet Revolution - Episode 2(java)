@@ -1,0 +1,164 @@
+import java.util.*;
+import java.io.*;
+import java.math.*;
+
+/**
+ * Auto-generated code below aims at helping you parse
+ * the standard input according to the problem statement.
+ **/
+class Player {
+
+    private static LinkedList<Integer> adj[];
+    private static int N;
+    private static int[] Es;
+    
+    static void BFS(int s) {
+        // 노드의 방문 여부 판단 (초깃값: false)
+        boolean visited[] = new boolean[N];
+        // BFS 구현을 위한 큐(Queue) 생성
+        LinkedList<Integer> queue = new LinkedList<Integer>();
+
+        // 현재 노드를 방문한 것으로 표시하고 큐에 삽입(enqueue)
+        visited[s] = true;
+        queue.add(s);   
+        // 제거할 연결노드
+        int innode = -1;
+        int outnode = -1;
+    
+        // 큐(Queue)가 빌 때까지 반복
+        while (queue.size() != 0) {
+          int tempnode = -1;
+          // 노드에 이웃한 게이트수
+          int numgates = 0;
+          // 방문한 노드를 큐에서 추출(dequeue)하고 값을 출력
+          int v = queue.poll();
+          visited[v] = true;
+
+          // 방문한 노드와 인접한 모든 노드를 가져온다.
+          Iterator<Integer> i = adj[v].listIterator();
+          Iterator<Integer> j = adj[v].listIterator();
+          while (i.hasNext()) {
+            int n = i.next();
+            // 노드와 연결된 gateway 수 찾기
+            if (!visited[n]) {
+                for(int e :Es) {
+                	if(n == e) {
+                		numgates++;
+                		tempnode = n; // gateway에 해당하는 노드 저장
+                	}
+                }
+            }
+          }
+          // 첫번째로 발견한 gateway일 때 노드 저장
+          if(outnode == -1 && innode == -1)
+            outnode = tempnode;
+          // 노드와 연결된 gateway가 2개이상인 경우, 바로 연결제거
+          if(numgates > 1) {
+              outnode = tempnode;
+              innode = v;
+        	  break;
+          }
+          else if(numgates == 1) { // 노드와 연결된 gateway가 1개인 경우
+        	  if(outnode == tempnode) //첫번째로 발견한 gateway일 때 노드 저장                 
+        	      innode = v;
+
+              while (j.hasNext()) {
+                  int n = j.next();
+                  // 방문하지 않은 노드면 방문한 것으로 표시하고 큐에 삽입(enqueue)
+                  if (!visited[n]) {
+                	  // 노드가 gateway인 경우 queue에 넣지 않고 넘어감
+                	  boolean isgateway = false;
+                	  for(int e : Es) {
+                		  if(e == n)
+                			  isgateway = true;
+                	  }
+                	  if(!isgateway) {
+                		  visited[n] = true;
+                      	  queue.add(n);
+                	  }
+                  }
+                }
+        	  if(v == s) { //시작 노드가 gateway와 연결되 있으면 바로 연결 끊기
+        		  break;
+        	  }
+          }
+          // 첫번째 gateway를 발견후에는 gateway가 연결되지 않은 노드는 우선순위가 아니므로 <- gateway가 연결되지 않은 노드는 첫번째 gateway가 발견되기 전까지만 경로를 찾기위해 queue에 추가
+          else if(numgates == 0 && innode == -1) {
+        	  while (j.hasNext()) {
+                  int n = j.next();
+                  // 방문하지 않은 노드면 방문한 것으로 표시하고 큐에 삽입(enqueue)
+                  if (!visited[n]) {
+                	  boolean isgateway = false;
+                	  for(int e : Es) {
+                		  if(e == n)
+                			  isgateway = true;
+                	  }
+                	  if(!isgateway) {
+                		  visited[n] = true;
+                      	  queue.add(n);
+                	  }
+                  }
+                }
+          }
+        }
+        System.out.printf("%d %d%n",innode,outnode);
+        removelink(innode,outnode); // 연결 제거
+        return;
+    }
+    
+    public static void removelink(int input, int output) {
+    	// adjacency list에서 서로 연결된 노드값을 index에서 찾아 제거
+    	int nl =0;
+    	for(int o : adj[input]) {
+    		if(o == output)
+    			break;
+    		nl++;
+    	}
+    	adj[input].remove(nl);
+    	
+    	int nls = 0;
+    	for(int o : adj[output]) {
+    		if(o == input)
+    			break;
+    		nls++;
+    	}
+    	adj[output].remove(nls);
+    }
+  
+    public static void main(String args[]) {
+        Scanner in = new Scanner(System.in);
+        N = in.nextInt(); // the total number of nodes in the level, including the gateways
+        int L = in.nextInt(); // the number of links
+        int E = in.nextInt(); // the number of exit gateways
+        
+        Es = new int[E];
+        adj = new LinkedList[N];
+        for(int i = 0; i < N; i++){
+            adj[i] = new LinkedList();
+        }
+
+
+        for (int i = 0; i < L; i++) {
+            int N1 = in.nextInt(); // N1 and N2 defines a link between these nodes
+            int N2 = in.nextInt();
+            adj[N1].add(N2);
+            adj[N2].add(N1);
+        }
+        for (int i = 0; i < E; i++) {
+            int EI = in.nextInt(); // the index of a gateway node
+            Es[i] = EI;
+        }
+
+        // game loop
+        while (true) {
+            int SI = in.nextInt(); // The index of the node on which the Skynet agent is positioned this turn
+            BFS(SI);
+
+            // Write an action using System.out.println()
+            // To debug: System.err.println("Debug messages...");
+
+
+            // Example: 0 1 are the indices of the nodes you wish to sever the link between
+        }
+    }
+}
